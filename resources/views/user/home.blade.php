@@ -30,6 +30,10 @@
         /* Hero Section */
         .hero-section {
             margin-bottom: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
 
         .hero-section h2 {

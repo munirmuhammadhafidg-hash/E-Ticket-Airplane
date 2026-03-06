@@ -12,7 +12,8 @@ class PenerbanganController extends Controller
     public function index()
     {
         $penerbangan = Penerbangan::with(['bandaraAsal', 'bandaraTujuan'])
-            ->latest()
+            ->where('waktu_berangkat', '>=', now()) // Hanya tampilkan yang belum berangkat
+            ->orderBy('waktu_berangkat', 'asc')
             ->paginate(15);
 
         return view('admin.penerbangan.index', compact('penerbangan'));
@@ -73,28 +74,37 @@ class PenerbanganController extends Controller
 
     public function search(Request $request)
     {
-        $asal = $request->input('search');
-        $tujuan = $request->input('tujuan');
+        // Mengambil input dari URL
+        $asal = $request->input('search');   // Isinya "bali"
+        $tujuan = $request->input('tujuan'); // Isinya "surabaya"
         $tanggal = $request->input('tanggal');
 
         $query = Penerbangan::with(['bandaraAsal', 'bandaraTujuan']);
 
+        // Filter ASAL
         if ($asal) {
             $query->whereHas('bandaraAsal', function ($q) use ($asal) {
-                $q->where('kota', 'LIKE', "%$asal%")
-                    ->orWhere('kode_iata', 'LIKE', "%$asal%")
-                    ->orWhere('nama_bandara', 'LIKE', "%$asal%");
+                $q->where(function ($sub) use ($asal) {
+                    $sub->where('kota', '=', $asal)
+                        ->orWhere('kode_iata', 'LIKE', "%$asal%")
+                        ->orWhere('nama_bandara', 'LIKE', "%$asal%")
+                        ->orWhere('negara', 'LIKE', "%$asal%"); // Tambahan jika user ketik nama negara
+                });
             });
         }
 
+        // Filter TUJUAN
         if ($tujuan) {
             $query->whereHas('bandaraTujuan', function ($q) use ($tujuan) {
-                $q->where('kota', 'LIKE', "%$tujuan%")
-                    ->orWhere('kode_iata', 'LIKE', "%$tujuan%")
-                    ->orWhere('nama_bandara', 'LIKE', "%$tujuan%");
+                $q->where(function ($sub) use ($tujuan) {
+                    $sub->where('kota', '=', $tujuan)
+                        ->orWhere('kode_iata', 'LIKE', "%$tujuan%")
+                        ->orWhere('nama_bandara', 'LIKE', "%$tujuan%");
+                });
             });
         }
 
+        // Filter TANGGAL
         if ($tanggal) {
             $query->whereDate('waktu_berangkat', $tanggal);
         }

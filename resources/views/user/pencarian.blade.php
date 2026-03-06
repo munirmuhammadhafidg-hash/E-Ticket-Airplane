@@ -218,9 +218,7 @@
             <div class="btn-sort-pill active" onclick="sortFlights('price', this)">
                 <i class="fas fa-tag"></i> Harga Terendah
             </div>
-            <div class="btn-sort-pill" onclick="sortFlights('time', this)">
-                <i class="fas fa-clock"></i> Keberangkatan
-            </div>
+            
         </div>
 
         <div id="flight-list">
